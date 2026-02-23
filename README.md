@@ -6,7 +6,7 @@
 
 *The orchestration layer of the Crux Sovereign AI Stack*
 
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
 [![Part of Crux Ecosystem](https://img.shields.io/badge/crux-ecosystem-orange)](https://github.com/crux-ecosystem)
 
@@ -68,7 +68,7 @@ Neural Kernel is an **AI microkernel** — a minimal, capability-secured runtime
 ### Build from source
 
 ```bash
-# Clone
+# Private repository — requires CruxLabx access
 git clone https://github.com/crux-ecosystem/neural-kernel.git
 cd neural-kernel
 
@@ -221,12 +221,12 @@ Neural_Kernel/
 | Project | Role | Language | Status |
 |---------|------|----------|--------|
 | [MOL](https://github.com/crux-ecosystem/mol-lang) | Sovereign compute language | Python | v1.1.0 |
-| [De-RAG](https://github.com/crux-ecosystem/de-rag) | Decentralized encrypted data | Python | v0.1.0 |
+| [De-RAG](https://github.com/crux-ecosystem/De-RAG-Showcase) | Decentralized encrypted data | Python | v0.1.0 |
 | **Neural Kernel** | AI microkernel & orchestration | Rust | v0.1.0 |
 | [IntraMind](https://github.com/crux-ecosystem/IntraMind-Showcase) | Campus RAG showcase | Python | Pre-prod |
 
 ## License
 
-AGPL-3.0 — See [LICENSE](LICENSE) for details.
+Proprietary — All rights reserved.
 
 **Copyright (c) 2026 CruxLabx**
