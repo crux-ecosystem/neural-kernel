@@ -1,0 +1,84 @@
+[package]
+name = "neural-kernel"
+version = "0.1.0"
+edition = "2021"
+authors = ["CruxLabx <dev@cruxlabx.com>"]
+license = "AGPL-3.0"
+description = "AI Microkernel — Capability-based agent scheduler with VectorFS"
+repository = "https://github.com/crux-ecosystem/neural-kernel"
+keywords = ["ai", "kernel", "agents", "vectorfs", "sovereign"]
+categories = ["science", "algorithms"]
+rust-version = "1.75"
+
+[lib]
+name = "neural_kernel"
+path = "src/lib.rs"
+
+[[bin]]
+name = "nk"
+path = "src/main.rs"
+
+[dependencies]
+# Core
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+anyhow = "1"
+
+# Crypto & Security
+ring = "0.17"
+ed25519-dalek = { version = "2", features = ["serde"] }
+rand = "0.8"
+blake3 = "1"
+zeroize = { version = "1", features = ["derive"] }
+
+# Vector operations
+ndarray = "0.16"
+simsimd = { version = "5", optional = true }
+
+# IPC & Serialization
+rmp-serde = "1"
+bincode = "1"
+bytes = "1"
+
+# System
+nix = { version = "0.29", features = ["signal", "process", "resource"] }
+libc = "0.2"
+memmap2 = "0.9"
+page_size = "0.6"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# PyO3 (Python bindings)
+pyo3 = { version = "0.22", features = ["extension-module"], optional = true }
+
+# FUSE (VectorFS)
+fuser = { version = "0.14", optional = true }
+
+[features]
+default = ["vectorfs"]
+vectorfs = ["fuser"]
+python = ["pyo3"]
+simd = ["simsimd"]
+full = ["vectorfs", "python", "simd"]
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3"
+proptest = "1"
+tokio-test = "0.4"
+
+[[bench]]
+name = "scheduler"
+harness = false
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = 3
