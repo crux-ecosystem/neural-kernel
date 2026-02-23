@@ -14,7 +14,7 @@ use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 
-use crate::agent::{Agent, AgentId, ResourceQuota};
+use crate::agent::AgentId;
 use crate::capability::{Capability, CapabilitySet};
 use crate::syscall::Syscall;
 
@@ -111,7 +111,8 @@ pub struct Violation {
     pub violation_type: ViolationType,
     /// Human-readable description
     pub description: String,
-    /// When it happened
+    /// When it happened (skipped in serialization — Instant is not serializable)
+    #[serde(skip)]
     pub timestamp: Instant,
 }
 

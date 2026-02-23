@@ -42,6 +42,7 @@
 //! └────────────────────────────────┘
 //! ```
 //!
+//! Author: Mounesh Kodi — CruxLabx
 //! Copyright (c) 2026 CruxLabx — AGPL-3.0
 
 pub mod agent;

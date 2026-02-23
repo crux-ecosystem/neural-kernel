@@ -316,6 +316,15 @@ Neural Kernel wraps agents from every layer:
 
 ---
 
+## Part of the Crux Ecosystem
+
+| Project | Role | Language | Status |
+|---------|------|----------|--------|
+| [MOL](https://github.com/crux-ecosystem/mol-lang) | Sovereign compute language | Python | v1.1.0 |
+| [De-RAG](https://github.com/crux-ecosystem/de-rag) | Decentralized encrypted data | Python | v0.1.0 |
+| **Neural Kernel** | AI microkernel & orchestration | Rust | v0.1.0 |
+| [IntraMind](https://github.com/crux-ecosystem/IntraMind-Showcase) | Offline-first RAG engine | Python | v1.1.0 |
+
 ## Build With Us
 
 **CruxLabx** is building an operating system for AI agents — not another framework, not another wrapper, but a real kernel with scheduling, isolation, and capability-based security.
@@ -335,6 +344,8 @@ We believe AI agents deserve the same rigor as operating system processes — is
 ---
 
 <div align="center">
+
+**Creator:** Mounesh Kodi
 
 **Copyright © 2026 CruxLabx**
 

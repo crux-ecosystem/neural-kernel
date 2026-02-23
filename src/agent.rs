@@ -12,12 +12,11 @@ use std::fmt;
 use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
-use zeroize::Zeroize;
 
 use crate::capability::CapabilitySet;
 
 /// Unique agent identifier — 128-bit random ID
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct AgentId([u8; 16]);
 
 impl AgentId {

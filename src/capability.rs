@@ -21,7 +21,7 @@
 
 use std::collections::HashSet;
 use std::fmt;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
 
@@ -127,7 +127,8 @@ pub struct CapabilityToken {
     /// Who holds this token
     pub holder: AgentId,
 
-    /// Optional expiry
+    /// Optional expiry (Duration from creation; Instant is not serializable)
+    #[serde(skip, default)]
     pub expires_at: Option<Instant>,
 
     /// Whether this token can be further delegated

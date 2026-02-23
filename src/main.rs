@@ -101,7 +101,7 @@ https://github.com/crux-ecosystem
 
 // ─── Command Handlers ──────────────────────────────────────
 
-fn cmd_start(args: &[String]) -> ExitCode {
+fn cmd_start(_args: &[String]) -> ExitCode {
     tracing::info!("Starting Neural Kernel...");
 
     let rt = tokio::runtime::Builder::new_multi_thread()

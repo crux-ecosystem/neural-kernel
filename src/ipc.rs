@@ -16,9 +16,7 @@
 //! Messages are serialized with MessagePack for minimal overhead.
 
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
-use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
 
@@ -28,6 +26,7 @@ use crate::agent::AgentId;
 const MAX_MESSAGE_SIZE: usize = 64 * 1024;
 
 /// Default ring buffer capacity (1 MB)
+#[allow(dead_code)]
 const DEFAULT_RING_CAPACITY: usize = 1024 * 1024;
 
 /// IPC message types

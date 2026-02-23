@@ -15,12 +15,10 @@
 //!   0xF0-0xFF  Kernel internal (reserved)
 //! ```
 
-use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use crate::agent::AgentId;
-use crate::capability::{Capability, CapabilityError};
+use crate::capability::Capability;
 
 /// Syscall numbers
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

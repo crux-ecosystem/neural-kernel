@@ -32,8 +32,7 @@
 //! This module provides the data structures and logic.
 
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-use std::time::{Duration, Instant, SystemTime};
+use std::time::SystemTime;
 
 use serde::{Deserialize, Serialize};
 
@@ -235,6 +234,7 @@ pub struct VectorStore {
     /// All clusters by ID
     clusters: HashMap<u64, Cluster>,
     /// Root cluster ID
+    #[allow(dead_code)]
     root_cluster_id: u64,
     /// Dimension
     dim: usize,

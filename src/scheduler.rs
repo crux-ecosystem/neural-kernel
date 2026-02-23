@@ -24,13 +24,12 @@
 //! pick_next() → dispatch(agent) → [agent runs] → preempt/yield → enqueue()
 //! ```
 
-use std::collections::{BTreeMap, HashMap, VecDeque};
-use std::sync::{Arc, Mutex};
+use std::collections::{BTreeMap, HashMap};
 use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 
-use crate::agent::{Agent, AgentId, AgentState, BlockReason, Priority};
+use crate::agent::{Agent, AgentId, AgentState, BlockReason};
 
 /// Scheduler configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -172,8 +171,8 @@ impl Scheduler {
     /// Pick the next agent to run (lowest vruntime wins)
     pub fn pick_next(&mut self) -> Option<AgentId> {
         // Pop from front of BTreeMap (lowest vruntime)
-        let (key, id) = self.ready_queue.iter().next()?.clone();
-        let (key, id) = self.ready_queue.remove_entry(&key)?;
+        let key = *self.ready_queue.keys().next()?;
+        let (_key, id) = self.ready_queue.remove_entry(&key)?;
 
         self.stats.total_schedules += 1;
         Some(id)
@@ -211,11 +210,18 @@ impl Scheduler {
             .transition(AgentState::Ready)
             .map_err(|e| SchedulerError::StateTransition(e.to_string()))?;
 
-        // Recalculate time slice
-        agent.time_slice_remaining = self.calculate_time_slice(agent);
+        // Recalculate time slice — extract weight first to avoid borrow conflict
+        let agent_weight = agent.weight();
+        let vruntime = agent.vruntime;
+        // End mutable borrow of agent
+        let _ = agent;
+        let time_slice = self.calculate_time_slice_by_weight(agent_weight);
+        if let Some(agent) = self.agents.get_mut(&agent_id) {
+            agent.time_slice_remaining = time_slice;
+        }
 
         // Re-enqueue with updated vruntime
-        self.ready_queue.insert((agent.vruntime, agent_id), agent_id);
+        self.ready_queue.insert((vruntime, agent_id), agent_id);
 
         // Update min_vruntime
         if let Some((&(min_vrt, _), _)) = self.ready_queue.iter().next() {
@@ -273,9 +279,17 @@ impl Scheduler {
         // Ensure vruntime doesn't go below global minimum
         agent.vruntime = agent.vruntime.max(self.min_vruntime);
 
-        agent.time_slice_remaining = self.calculate_time_slice(agent);
+        // Extract weight before dropping mutable borrow
+        let agent_weight = agent.weight();
+        let vruntime = agent.vruntime;
+        // End mutable borrow of agent
+        let _ = agent;
+        let time_slice = self.calculate_time_slice_by_weight(agent_weight);
+        if let Some(agent) = self.agents.get_mut(&agent_id) {
+            agent.time_slice_remaining = time_slice;
+        }
 
-        self.ready_queue.insert((agent.vruntime, agent_id), agent_id);
+        self.ready_queue.insert((vruntime, agent_id), agent_id);
         self.blocked.remove(&agent_id);
 
         Ok(())
@@ -341,6 +355,24 @@ impl Scheduler {
     }
 
     /// Calculate time slice for an agent
+    /// Calculate time slice given an agent weight (avoids borrow conflicts)
+    fn calculate_time_slice_by_weight(&self, agent_weight: u64) -> Duration {
+        let total_weight: u64 = self
+            .agents
+            .values()
+            .filter(|a| a.is_alive())
+            .map(|a| a.weight())
+            .sum();
+
+        if total_weight == 0 {
+            return self.config.quantum;
+        }
+
+        let slice_ns = self.config.target_latency.as_nanos() as u64 * agent_weight / total_weight;
+        let slice = Duration::from_nanos(slice_ns);
+        slice.max(self.config.min_granularity).min(self.config.quantum)
+    }
+
     fn calculate_time_slice(&self, agent: &Agent) -> Duration {
         let total_weight: u64 = self
             .agents
@@ -393,6 +425,7 @@ pub enum SchedulerError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::agent::Priority;
     use crate::capability::CapabilitySet;
 
     #[test]
@@ -412,19 +445,29 @@ mod tests {
         // Low priority agent — gets high vruntime quickly
         let mut low = Agent::new("low");
         low.priority = Priority::Idle;
-        low.vruntime = 1000; // simulate accumulation
-        let low_id = AgentId::new();
-        low.id = low_id;
+        let low_id = low.id;
 
         // High priority agent — low vruntime
         let mut high = Agent::new("high");
         high.priority = Priority::Critical;
-        high.vruntime = 100;
-        let high_id = AgentId::new();
-        high.id = high_id;
+        let high_id = high.id;
 
-        sched.admit(low).unwrap();
-        sched.admit(high).unwrap();
+        let low_id = sched.admit(low).unwrap();
+        let high_id = sched.admit(high).unwrap();
+
+        // Manually set vruntimes to simulate scheduling history
+        // (admit resets vruntime to min_vruntime)
+        if let Some(agent) = sched.agents.get_mut(&low_id) {
+            agent.vruntime = 1000;
+        }
+        if let Some(agent) = sched.agents.get_mut(&high_id) {
+            agent.vruntime = 100;
+        }
+
+        // Re-insert into ready queue with correct vruntimes
+        sched.ready_queue.clear();
+        sched.ready_queue.insert((1000, low_id), low_id);
+        sched.ready_queue.insert((100, high_id), high_id);
 
         // High-priority agent should be picked first (lower vruntime)
         let next = sched.pick_next().unwrap();
